@@ -6,11 +6,14 @@ editor: visual
 ---
 
 # Clinical features, resistance patterns and treatment outcomes of drug-resistant extra-pulmonary tuberculosis: a scoping review
-This document has the code necessary to generate the tables in the above paper. 
-Relevant abbreviations: RR, Rifampicin Resistant; MDR, Multi-drug Resistant; pre-XDR, pre-extensively drug-resistant; XDR, extensively drug-resistant; TB, Tuberculosis; PRISMA, Preferred Reporting Items for Systematic Review and Meta-Analyses.
-## Read and clean data
+
+This document has the code necessary to generate the tables in the above paper. Relevant abbreviations: RR, Rifampicin Resistant; MDR, Multi-drug Resistant; pre-XDR, pre-extensively drug-resistant; XDR, extensively drug-resistant; TB, Tuberculosis; PRISMA, Preferred Reporting Items for Systematic Review and Meta-Analyses. \## Read and clean data
+
 ```{r}
 #| label: fetch-data
+#| results: false
+#| warning: false
+#| message: false
 library(tidyverse) # for data wrangling functions
 library(conflicted) # for handling conflicts between packages
 library(here) # for handling paths
@@ -27,51 +30,58 @@ data$died_n <- as.numeric(data$died_n) # convert died_n column to numeric
 data <- data |> mutate(across(c(rif:xdr, surgical_intervention_n:not_treated), ~ round((.x / total_with_resistance * 100), 1)))
 
 ```
+
 ## Table 1
-This table shows characteristics and demographics of the included studies.
-We did some additional formatting of this table in MS word to insert captions and footnotes. 
+
+This table shows characteristics and demographics of the included studies. We did some additional formatting of this table in MS word to insert captions and footnotes.
+
 ```{r}
 #| label: table-one
 data$age_median <- as.character(data$age_median)
 data |> select(author, publication_year, country, type_of_study,
          start_of_data_collection, end_of_data_collection, sample_size, total_with_resistance, age_mean, age_median) |> kable()
 ```
+
 ## Table 2
-This table was created manually in MS word because it made formatting easier.
-The variables with the relevant information is `symptoms_n_percent` and `signs_n_percent`.
-## Table 3
-This table reported the proportion of DR-epTB for each drug and combinations (e.g., MDR, pre-XDR, XDR). Final touches were added in MS word.
+
+This table was created manually in MS word because it made formatting easier. The variables with the relevant information is `symptoms_n_percent` and `signs_n_percent`. \## Table 3 This table reported the proportion of DR-epTB for each drug and combinations (e.g., MDR, pre-XDR, XDR). Final touches were added in MS word.
+
 ```{r}
 #| label: table-3
 
 data |> select(author, total_with_resistance, rif:xdr) |> kable()
 ```
+
 ## Table 4
+
 This table reports the treatment outcomes among patients treated for DR-epTB. Finishing touches (e.g., captions, footnotes, etc) were added using MS word.
+
 ```{r}
 #| label: table-4
 
 data %>%
   select(author, total_with_resistance, cured_completed_treatment_n:not_treated) |> kable()
 ```
+
 ## Figure 1: PRISMA flow diagram
+
 I first download the PRISMA template csv [here](https://estech.shinyapps.io/prisma_flowdiagram/) then edited the csv to include numbers/values/figures relevant to out review. The following code chunk renders the flow diagram.
+
 ```{r}
 #| label: PRISMA
-
+#| warning: false
 library(PRISMA2020)
 prisma <- read.csv(here("data", "PRISMA.csv")) |> PRISMA_data()
 
 eptb_flow <- PRISMA_flowdiagram(prisma, interactive = FALSE, previous = FALSE, other = FALSE, side_boxes = TRUE)
 
-PRISMA_save(eptb_flow, filename = here("figures", "flow_diagram.png"), filetype = "png", overwrite = TRUE)
+PRISMA_save(eptb_flow, filename = here("figures", "flow_diagram.svg"), filetype = "svg", overwrite = TRUE)
 ```
 
-
 The packages used in this session are:
+
 ```{r}
 #| label: session-info
 
 sessioninfo::session_info()
 ```
-
